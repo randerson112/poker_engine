@@ -96,6 +96,17 @@ Deck* create_deck() {
     return deck;
 }
 
+// Creates the given number of players and returns a pointer to the array
+Player* create_players(size_t num_players) {
+    Player* players = malloc(sizeof(Player) * num_players);
+
+    for (size_t i = 0; i < num_players; i++) {
+        players[i].hand_count = 0;
+    }
+
+    return players;
+}
+
 // Shuffles the deck using Fisher-Yates shuffle algorithm
 void shuffle_deck(Deck* deck) {
     for (size_t i = deck->cards_count - 1; i > 0; i--) {
@@ -106,12 +117,61 @@ void shuffle_deck(Deck* deck) {
     }
 }
 
+// Removes and returns the top card of the deck
+Card get_card(Deck* deck) {
+    return deck->cards[(deck->cards_count--) - 1];
+}
+
 // Deals a single card to a player
 void deal_card(Deck* deck, Player* player) {
     if (player->hand_count >= 2 || deck->cards_count == 0) return;
 
-    Card card = deck->cards[(deck->cards_count--) - 1];
+    Card card = get_card(deck);
     player->hand[player->hand_count++] = card;
+}
+
+// Burns the top card of the deck
+void burn_card(Deck* deck, Table* table) {
+    if (table->burns_count >= 3 || deck->cards_count == 0) return;
+
+    Card card = get_card(deck);
+    table->burns[table->burns_count++] = card;
+}
+
+// Deals two cards to each player
+void deal_player_cards(Player* players, size_t num_players, Deck* deck) {
+    for (int i = 0; i < 2; i++) {
+        for (size_t j = 0; j < num_players; j++) {
+            deal_card(deck, &players[j]);
+        }
+    }
+}
+
+void deal_flop(Deck* deck, Table* table) {
+    if (table->board_count != 0) return;
+
+    for (int i = 0; i < 3; i++) {
+        Card card = get_card(deck);
+        table->board[i] = card;
+    }
+
+    table->board_count = 3;
+}
+
+void deal_turn(Deck* deck, Table* table) {
+    if (table->board_count != 3) return;
+
+    Card card = get_card(deck);
+    table->board[3] = card;
+    table->board_count = 4;
+}
+
+void deal_river(Deck* deck, Table* table) {
+    if (table->board_count != 4) return;
+
+    Card card = get_card(deck);
+    table->board[4] = card;
+    table->board_count = 5;
 }
 
 // Returns a card to the deck
@@ -146,18 +206,46 @@ void clean_up_hand(Player* players, size_t num_players, Table* table, Deck* deck
 
     // Muck cards
     for (size_t i = 0; i < table->muck_count; i++) {
-            return_card(deck, table->muck[i]);
-        }
-        table->muck_count = 0;
+        return_card(deck, table->muck[i]);
+    }
+    table->muck_count = 0;
 }
 
 int main() {
 
     srand(time(NULL));
 
+    size_t num_players = 4;
+    Player* players = create_players(num_players);
+
     Deck* deck = create_deck();
     shuffle_deck(deck);
 
+    Table table = {0};
+
+    deal_player_cards(players, num_players, deck);
+
+    for (size_t i = 0; i < num_players; i++) {
+        printf("Player %zu: %s%s %s%s\n", i + 1, value_to_string(players[i].hand[0].value), suit_to_string(players[i].hand[0].suit), value_to_string(players[i].hand[1].value), suit_to_string(players[i].hand[1].suit));
+    }
+
+    burn_card(deck, &table);
+    deal_flop(deck, &table);
+
+    burn_card(deck, &table);
+    deal_turn(deck, &table);
+
+    burn_card(deck, &table);
+    deal_river(deck, &table);
+
+    for (size_t i = 0; i < table.board_count; i++) {
+        printf("%s%s ", value_to_string(table.board[i].value), suit_to_string(table.board[i].suit));
+    }
+    printf("\n");
+
+    clean_up_hand(players, num_players, &table, deck);
+
+    printf("%zu\n", deck->cards_count);
     for (int i = 0; i < 52; i++) {
         const char* value = value_to_string(deck->cards[i].value);
         const char* suit = suit_to_string(deck->cards[i].suit);
