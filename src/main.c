@@ -2,62 +2,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-typedef enum {
-    TWO,
-    THREE,
-    FOUR,
-    FIVE,
-    SIX,
-    SEVEN,
-    EIGHT,
-    NINE,
-    TEN,
-    JACK,
-    QUEEN,
-    KING,
-    ACE
-} Value;
-
-const char* value_to_string(Value v) {
-    switch (v) {
-        case TWO: return "2";
-        case THREE: return "3";
-        case FOUR: return "4";
-        case FIVE: return "5";
-        case SIX: return "6";
-        case SEVEN: return "7";
-        case EIGHT: return "8";
-        case NINE: return "9";
-        case TEN: return "T";
-        case JACK: return "J";
-        case QUEEN: return "Q";
-        case KING: return "K";
-        case ACE: return "A";
-        default: return "?";
-    }
-}
-
-typedef enum {
-    SPADES,
-    DIAMONDS,
-    CLUBS,
-    HEARTS
-} Suit;
-
-const char* suit_to_string(Suit s) {
-    switch (s) {
-        case SPADES: return "♠️";
-        case DIAMONDS: return "♦️";
-        case CLUBS: return "♣️";
-        case HEARTS: return "♥️";
-        default: return "?";
-    }
-}
-
-typedef struct {
-    Value value;
-    Suit suit;
-} Card;
+#include "card.h"
+#include "hand_eval.h"
 
 typedef struct {
     Card cards[52];
@@ -211,6 +157,37 @@ void clean_up_hand(Player* players, size_t num_players, Table* table, Deck* deck
     table->muck_count = 0;
 }
 
+// Determines the winners of a hand.
+// Returns the indices in the players list and the number of winners to the out values.
+// Multiple winners means a split pot.
+void determine_winners(Player* players, size_t num_players, Table* table, int* out_winner_indices, size_t* out_num_winners, HandScore* out_best_score) {
+    HandScore best_score = {0};
+    *out_num_winners = 0;
+
+    for (size_t i = 0; i < num_players; i++) {
+        Card seven[7];
+        seven[0] = players[i].hand[0];
+        seven[1] = players[i].hand[1];
+        for (size_t b = 0; b < 5; b++) {
+            seven[2 + b] = table->board[b];
+        }
+
+        HandScore score = evaluate_best_hand(seven);
+        int compare = compare_scores(score, best_score);
+
+        // Check if new best hand is found
+        if (*out_num_winners == 0 || compare > 0) {
+            best_score = score;
+            out_winner_indices[0] = (int)i;
+            *out_num_winners = 1;
+        } else if (compare == 0) {
+            out_winner_indices[(*out_num_winners)++] = (int)i; // Ties (split pot)
+        }
+    }
+
+    *out_best_score = best_score;
+}
+
 int main() {
 
     srand(time(NULL));
@@ -243,14 +220,34 @@ int main() {
     }
     printf("\n");
 
+    // Determine winners
+    int winner_indices[4];
+    size_t num_winners = 0;
+    HandScore winning_hand;
+
+    determine_winners(players, num_players, &table, winner_indices, &num_winners, &winning_hand);
+
+    if (num_winners == 1) {
+        printf("Winner: Player %d with %s\n", winner_indices[0] + 1, hand_description(winning_hand));
+    } else {
+        printf("Split pot (%s) between: ", hand_description(winning_hand));
+        for (size_t i = 0; i < num_winners; i++) {
+            printf("Player %d ", winner_indices[i] + 1);
+        }
+        printf("\n");
+    }
+
     clean_up_hand(players, num_players, &table, deck);
 
-    printf("%zu\n", deck->cards_count);
-    for (int i = 0; i < 52; i++) {
-        const char* value = value_to_string(deck->cards[i].value);
-        const char* suit = suit_to_string(deck->cards[i].suit);
-        printf("%s%s\n", value, suit);
-    }
+    // printf("%zu\n", deck->cards_count);
+    // for (int i = 0; i < 52; i++) {
+    //     const char* value = value_to_string(deck->cards[i].value);
+    //     const char* suit = suit_to_string(deck->cards[i].suit);
+    //     printf("%s%s\n", value, suit);
+    // }
+
+    free(deck);
+    free(players);
 
     return 0;
 }
