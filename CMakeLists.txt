@@ -6,6 +6,8 @@ set(CMAKE_C_STANDARD 99)
 
 add_executable(poker
     src/main.c
+    src/deck.c
+    src/player.c
     src/hand_eval.c
 )
 

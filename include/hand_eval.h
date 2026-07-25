@@ -2,6 +2,8 @@
 #define HAND_EVAL_H
 
 #include "card.h"
+#include "player.h"
+#include "table.h"
 
 typedef enum {
     HIGH_CARD,
@@ -51,5 +53,10 @@ HandScore evaluate_best_hand(Card cards[7]);
 // Negative: b is better
 // Zero: Hands are the same
 int compare_scores(HandScore a, HandScore b);
+
+// Determines the winners of a hand.
+// Returns the indices in the players list and the number of winners to the out values.
+// Multiple winners means a split pot.
+void determine_winners(Player* players, size_t num_players, Table* table, int* out_winner_indices, size_t* out_num_winners, HandScore* out_best_score);
 
 #endif // HAND_EVAL_H

@@ -160,10 +160,6 @@ HandScore evaluate_best_hand(Card cards[7]) {
     return result;
 }
 
-// Compares two hands to see which is better
-// Positive: a is better
-// Negative: b is better
-// Zero: Hands are the same
 int compare_scores(HandScore a, HandScore b) {
     if (a.rank != b.rank) return a.rank - b.rank;
 
@@ -172,4 +168,32 @@ int compare_scores(HandScore a, HandScore b) {
     }
 
     return 0;
+}
+
+void determine_winners(Player* players, size_t num_players, Table* table, int* out_winner_indices, size_t* out_num_winners, HandScore* out_best_score) {
+    HandScore best_score = {0};
+    *out_num_winners = 0;
+
+    for (size_t i = 0; i < num_players; i++) {
+        Card seven[7];
+        seven[0] = players[i].hand[0];
+        seven[1] = players[i].hand[1];
+        for (size_t b = 0; b < 5; b++) {
+            seven[2 + b] = table->board[b];
+        }
+
+        HandScore score = evaluate_best_hand(seven);
+        int compare = compare_scores(score, best_score);
+
+        // Check if new best hand is found
+        if (*out_num_winners == 0 || compare > 0) {
+            best_score = score;
+            out_winner_indices[0] = (int)i;
+            *out_num_winners = 1;
+        } else if (compare == 0) {
+            out_winner_indices[(*out_num_winners)++] = (int)i; // Ties (split pot)
+        }
+    }
+
+    *out_best_score = best_score;
 }
