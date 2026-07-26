@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include "card.h"
 
+#define MAX_PLAYERS 9
+
 typedef struct {
     Card hand[2];
     size_t hand_count;

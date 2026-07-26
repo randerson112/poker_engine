@@ -9,6 +9,7 @@ add_executable(poker
     src/deck.c
     src/player.c
     src/hand_eval.c
+    src/equity.c
 )
 
 target_include_directories(poker PUBLIC include)

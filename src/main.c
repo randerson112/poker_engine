@@ -7,6 +7,7 @@
 #include "player.h"
 #include "table.h"
 #include "hand_eval.h"
+#include "equity.h"
 
 int main() {
 
@@ -26,14 +27,24 @@ int main() {
         printf("Player %zu: %s%s %s%s\n", i + 1, value_to_string(players[i].hand[0].value), suit_to_string(players[i].hand[0].suit), value_to_string(players[i].hand[1].value), suit_to_string(players[i].hand[1].suit));
     }
 
+    Equity equities[num_players];
+    calculate_all_equity(players, num_players, &table, 50000, equities);
+    print_equites("Preflop", players, num_players, equities);
+
     burn_card(deck, &table);
     deal_flop(deck, &table);
+    calculate_all_equity(players, num_players, &table, 100000, equities);
+    print_equites("Flop", players, num_players, equities); 
 
     burn_card(deck, &table);
     deal_turn(deck, &table);
+    calculate_all_equity(players, num_players, &table, 100000, equities);
+    print_equites("Turn", players, num_players, equities);
 
     burn_card(deck, &table);
     deal_river(deck, &table);
+    calculate_all_equity(players, num_players, &table, 100000, equities);
+    print_equites("River", players, num_players, equities);
 
     for (size_t i = 0; i < table.board_count; i++) {
         printf("%s%s ", value_to_string(table.board[i].value), suit_to_string(table.board[i].suit));
