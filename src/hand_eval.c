@@ -1,6 +1,7 @@
 #include "hand_eval.h"
 
 #include <stdint.h>
+#include <stdio.h>
 
 // Finds the highest straight in a 13-bit value mask.
 // Returns the high card value of the straight, or -1 if none exists.
@@ -196,4 +197,16 @@ void determine_winners(Player* players, size_t num_players, Table* table, int* o
     }
 
     *out_best_score = best_score;
+}
+
+void print_winners(int* winner_indices, size_t num_winners, HandScore winning_hand) {
+    if (num_winners == 1) {
+        printf("Winner: Player %d with %s\n", winner_indices[0] + 1, hand_description(winning_hand));
+    } else {
+        printf("Split pot (%s) between: ", hand_description(winning_hand));
+        for (size_t i = 0; i < num_winners; i++) {
+            printf("Player %d ", winner_indices[i] + 1);
+        }
+        printf("\n");
+    }
 }

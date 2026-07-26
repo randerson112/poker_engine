@@ -14,4 +14,7 @@ typedef struct {
 // Creates the given number of players and returns a pointer to the array.
 Player* create_players(size_t num_players);
 
+// Prints each players hand
+void print_players(Player* players, size_t num_players);
+
 #endif

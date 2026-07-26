@@ -5,6 +5,8 @@
 #include "player.h"
 #include "table.h"
 
+#include <stdlib.h>
+
 typedef enum {
     HIGH_CARD,
     PAIR,
@@ -58,5 +60,8 @@ int compare_scores(HandScore a, HandScore b);
 // Returns the indices in the players list and the number of winners to the out values.
 // Multiple winners means a split pot.
 void determine_winners(Player* players, size_t num_players, Table* table, int* out_winner_indices, size_t* out_num_winners, HandScore* out_best_score);
+
+// Prints the winner(s) of the hand
+void print_winners(int* winner_indices, size_t num_winners, HandScore winning_hand);
 
 #endif // HAND_EVAL_H

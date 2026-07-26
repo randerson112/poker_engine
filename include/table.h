@@ -13,4 +13,7 @@ typedef struct {
     size_t muck_count;
 } Table;
 
+// Prints the cards currently on the board
+void print_board(Table* table);
+
 #endif
