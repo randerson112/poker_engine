@@ -17,6 +17,10 @@ Deck* create_deck();
 // Shuffles the deck using Fisher-Yates shuffle algorithm.
 void shuffle_deck(Deck* deck);
 
+// Sets a player's hand with specific cards, removing them from the deck.
+// Returns 0 if card strings are invalid, cards are the same, or cards are already in play.
+int set_player_hand(Player* player, Deck* deck, const char* card1, const char* card2);
+
 // Removes and returns the top card of the deck.
 Card get_card(Deck* deck);
 
@@ -25,6 +29,10 @@ void deal_card(Deck* deck, Player* player);
 
 // Burns the top card of the deck.
 void burn_card(Deck* deck, Table* table);
+
+// Removes a specific card from the deck.
+// Returns 1 if removed and 0 if not found.
+int remove_card(Deck* deck, Card card);
 
 // Deals two cards to each player.
 void deal_player_cards(Player* players, size_t num_players, Deck* deck);

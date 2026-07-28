@@ -29,33 +29,14 @@ typedef struct {
     Suit suit;
 } Card;
 
-static inline const char* value_to_string(Value v) {
-    switch (v) {
-        case TWO: return "2";
-        case THREE: return "3";
-        case FOUR: return "4";
-        case FIVE: return "5";
-        case SIX: return "6";
-        case SEVEN: return "7";
-        case EIGHT: return "8";
-        case NINE: return "9";
-        case TEN: return "T";
-        case JACK: return "J";
-        case QUEEN: return "Q";
-        case KING: return "K";
-        case ACE: return "A";
-        default: return "?";
-    }
-}
+// Converts a card value enum into a string.
+const char* value_to_string(Value v);
 
-static inline const char* suit_to_string(Suit s) {
-    switch (s) {
-        case SPADES: return "♠️";
-        case DIAMONDS: return "♦️";
-        case CLUBS: return "♣️";
-        case HEARTS: return "♥️";
-        default: return "?";
-    }
-}
+// Converts a card suit enum into a string.
+const char* suit_to_string(Suit s);
+
+// Parses two-character card notation (e.g. "AS", "Td", "9h") into a Card.
+// Returns 1 on success or 0 if the string is malformed.
+int parse_card(const char* str, Card* out);
 
 #endif // CARD_H

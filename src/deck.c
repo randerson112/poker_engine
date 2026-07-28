@@ -1,5 +1,6 @@
 #include "deck.h"
 
+#include <stdio.h>
 #include "player.h"
 #include "table.h"
 
@@ -29,6 +30,36 @@ void shuffle_deck(Deck* deck) {
     }
 }
 
+int set_player_hand(Player* player, Deck* deck, const char* card1, const char* card2) {
+    Card c1, c2;
+    if (!parse_card(card1, &c1) || !parse_card(card2, &c2)) {
+        fprintf(stderr, "Invalid card notation: \"%s\" or \"%s\"\n", card1, card2);
+        return 0;
+    }
+
+    if (c1.value == c2.value && c1.suit == c2.suit) {
+        fprintf(stderr, "Duplicate card: %s and %s are the same card\n", card1, card2);
+        return 0;
+    }
+
+    if (!remove_card(deck, c1)) {
+        fprintf(stderr, "Card %s is not available (already assigned elsewhere)\n", card1);
+        return 0;
+    }
+
+    if (!remove_card(deck, c2)) {
+        fprintf(stderr, "Card %s is not available (already assigned elsewhere)\n", card2);
+        deck->cards[deck->cards_count] = c1;   // roll back c1 so deck stays consistent
+        deck->cards_count++;
+        return 0;
+    }
+
+    player->hand[0] = c1;
+    player->hand[1] = c2;
+    player->hand_count = 2;
+    return 1;
+}
+
 Card get_card(Deck* deck) {
     return deck->cards[(deck->cards_count--) - 1];
 }
@@ -45,6 +76,17 @@ void burn_card(Deck* deck, Table* table) {
 
     Card card = get_card(deck);
     table->burns[table->burns_count++] = card;
+}
+
+int remove_card(Deck* deck, Card card) {
+    for (size_t i = 0; i < deck->cards_count; i++) {
+        if (deck->cards[i].value == card.value && deck->cards[i].suit == card.suit) {
+            deck->cards[i] = deck->cards[deck->cards_count - 1];
+            deck->cards_count--;
+            return 1;
+        }
+    }
+    return 0;
 }
 
 void deal_player_cards(Player* players, size_t num_players, Deck* deck) {

@@ -5,6 +5,7 @@ project(PokerEngine)
 set(CMAKE_C_STANDARD 99)
 
 add_library(poker STATIC
+    src/card.c
     src/deck.c
     src/table.c
     src/player.c
