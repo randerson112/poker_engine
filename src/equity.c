@@ -66,12 +66,13 @@ void calculate_all_equity(Player* players, size_t num_players, Table* table, int
 }
 
 void print_equites(const char* street, Player* players, size_t num_players, Equity* equities) {
-    printf("--%s Equities--\n", street);
+    printf("--%s Equities--\n\n", street);
 
     for (size_t p = 0; p < num_players; p++) {
         printf("Player %d:\n", (int)p + 1);
         printf("Win: %.2lf%%\n", equities[p].win_pct);
         printf("Tie: %.2lf%%\n", equities[p].tie_pct);
         printf("Lose: %.2lf%%\n", equities[p].lose_pct);
+        if (p != (int)num_players - 1) printf("\n");
     }
 }
